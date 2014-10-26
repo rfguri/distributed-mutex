@@ -24,7 +24,6 @@ public class Process extends Thread {
 			if (p == Protocol.Token) token.handleMessage();
 			else if (p == Protocol.Ricart) ricart.handleMessage();
 			else lamport.handleMessage();
-			try { Thread.sleep(10); } catch (InterruptedException e) {}
 		}
 	}
 
