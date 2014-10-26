@@ -16,7 +16,6 @@ public class Token extends Process {
 					System.out.println();
 					if (pid == 1) for (int j = (cm.getSize() / 2) + 1; j < cm.getSize(); j++) m.sendMessage(j, pid, cm, new Message(Message.Start, t));
 					if (pid == 0) for (int j = 2; j < (cm.getSize() / 2) + 1; j++) m.sendMessage(j, pid, cm, new Message(Message.Start, t));
-					//try { Thread.sleep(500); } catch (InterruptedException e) {}
 				} 
 				else if (m.getM().equals(Message.Finish)) {
 					if (acc == 3) {
