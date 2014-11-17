@@ -5,7 +5,7 @@ public class DistributedMutex {
 	
 		CommMatrix cm = new CommMatrix(8);
 		
-		cm.setM(1, 0, new Message(Message.Token, -1));
+		cm.setM(0, 1, new Message(Message.Token, 1));
 		
 		Process p0 = new Process(0, 1, cm, Protocol.Token);
 		Process p1 = new Process(1, 1, cm, Protocol.Token);
