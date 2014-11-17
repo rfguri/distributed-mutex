@@ -20,41 +20,61 @@ public class Lamport extends Process {
 			if (m != null) {
 				if (m.getM().equals(Message.Start)) {
 					int pos = pid - ((cm.getSize() / 2) + 1);
-					q[pos] = t;
-					m.brodcastMessage(pid, p, cm, new Message(Message.Request, t));
-				} 
-				else if (m.getM().equals(Message.Request)) {
+					q[pos] = pid;
+					m.brodcastMessage(pid, p, cm, new Message(Message.Request, pid));
+				} else if (m.getM().equals(Message.Request)) {
 					int pos = i - ((cm.getSize() / 2) + 1);
 					q[pos] = m.getT();
-					if (DEBUG) System.out.printf("[%d] (%d) %s [%d, %d, %d]\n", System.currentTimeMillis(), pid, m.getM(), q[0], q[1], q[2]);
 					t = (m.getT() > t) ? m.getT() + 1 : t + 1;
+					if (DEBUG) System.out.printf("[%d] (%d,%d) %s from (%d,%d) [%d, %d, %d]\n", System.currentTimeMillis(), pid, t, m.getM(), i, m.getT(), q[0], q[1], q[2]);
 					m.sendMessage(i, pid, cm, new Message(Message.Acknowledge, t));
-				}
-				else if (m.getM().equals(Message.Acknowledge)) {
-					int pos = i - ((cm.getSize() / 2) + 1);
-					if (pid != i) q[pos] = m.getT();
-					t = m.getT();
-					if (DEBUG) System.out.printf("[%d] (%d) %s [%d, %d, %d]\n", System.currentTimeMillis(), pid, m.getM(), q[0], q[1], q[2]);
+				} else if (m.getM().equals(Message.Acknowledge)) {
+					t = (m.getT() > t) ? m.getT() + 1 : t + 1;
+					if (DEBUG) System.out.printf("[%d] (%d,%d) %s from (%d,%d) [%d, %d, %d]\n", System.currentTimeMillis(), pid, t, m.getM(), i, m.getT(), q[0], q[1], q[2]);
 					if (acc == 3) {
 						boolean allowed = true;
-						if (q[pos] < this.getMinValue(q)) allowed = false;
-						else if (q[pos] == this.getMinValue(q) && pos < this.getMinValueIndex(q)) allowed = false;
+						int index = pid - ((cm.getSize() / 2) + 1);
+						if (index != this.getMinValueIndex(q)) allowed = false;
+						else if (q[index] < this.getMinValue(q)) allowed = false;
+						else if (q[index] == this.getMinValue(q) && index < this.getMinValueIndex(q)) allowed = false;
 						if (allowed) {
-							int index = pid - ((cm.getSize() / 2) + 1);
-							if (DEBUG) for (int j = 0; j < 10; j++) System.out.printf("[%d] (%d) I'm thread B%d\n", System.currentTimeMillis(), pid, index);
-							if (!DEBUG) for (int j = 0; j < 10; j++) System.out.printf("I'm thread B%d\n", index);
+							if (DEBUG) for (int j = 0; j < 10; j++) {
+								System.out.printf("[%d] (%d) I'm thread B%d\n", System.currentTimeMillis(), pid, index);
+								//try { Thread.sleep(10); } catch (InterruptedException e) {}
+							}
+							if (!DEBUG) for (int j = 0; j < 10; j++) {
+								System.out.printf("I'm thread B%d\n", index);
+								//try { Thread.sleep(10); } catch (InterruptedException e) {}
+							}
 							acc = 1;
 							m.brodcastMessage(pid, p, cm, new Message(Message.Release, t));
 						}
 					} else acc++;
-				}
-				else if (m.getM().equals(Message.Release)) {
+				} else if (m.getM().equals(Message.Release)) {
 					int pos = i - ((cm.getSize() / 2) + 1);
 					q[pos] = 9999;
-					if (DEBUG) System.out.printf("[%d] (%d) %s [%d, %d, %d]\n", System.currentTimeMillis(), pid, m.getM(), q[0], q[1], q[2]);
-					if (acc == 3) {
+					if (DEBUG) System.out.printf("[%d] (%d,%d) %s from (%d,%d) [%d, %d, %d] | acc: %d\n", System.currentTimeMillis(), pid, t, m.getM(), i, m.getT(), q[0], q[1], q[2], acc);
+					boolean allowed = true;
+					int index = pid - ((cm.getSize() / 2) + 1);
+					if (index != this.getMinValueIndex(q) || q[index] == 9999) allowed = false;
+					else if (q[index] < this.getMinValue(q)) allowed = false;
+					else if (q[index] == this.getMinValue(q) && index < this.getMinValueIndex(q)) allowed = false;
+					if (allowed) {
+						if (DEBUG) for (int j = 0; j < 10; j++) {
+							System.out.printf("[%d] (%d) I'm thread B%d\n", System.currentTimeMillis(), pid, index);
+							//try { Thread.sleep(10); } catch (InterruptedException e) {}
+						}
+						if (!DEBUG) for (int j = 0; j < 10; j++) {
+							System.out.printf("I'm thread B%d\n", index);
+							//try { Thread.sleep(10); } catch (InterruptedException e) {}
+						}
+						acc = 1;
+						m.brodcastMessage(pid, p, cm, new Message(Message.Release, t));
+					}
+					if (acc == 3) {	
 						cm.setM(0, pid, new Message(Message.Finish, t));
 						acc = 1;
+						if (DEBUG) System.out.printf("[%d] (%d,%d) Finished to 1\n", System.currentTimeMillis(), pid, t);
 					} else acc++;
 				}
 			}
