@@ -36,7 +36,7 @@ public class Message {
 	public void brodcastMessage(int pid, int p, CommMatrix cm, Message m) {
 		int start = (p == Protocol.Ricart) ? 2 : (cm.getSize() / 2) + 1;
 		int end = (p == Protocol.Ricart) ? (cm.getSize() / 2) + 1 : cm.getSize();
-		for (int i = start; i < end; i++) this.sendMessage(pid, i, cm, m);
+		for (int i = start; i < end; i++) this.sendMessage(i, pid, cm, m);
 	}
 	
 	public void sendMessage(int pid, int i, CommMatrix cm, Message m) {
