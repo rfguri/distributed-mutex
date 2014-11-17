@@ -24,6 +24,7 @@ public class Process extends Thread {
 			if (p == Protocol.Token) token.handleMessage();
 			else if (p == Protocol.Ricart) ricart.handleMessage();
 			else lamport.handleMessage();
+			Thread.yield();
 		}
 	}
 
